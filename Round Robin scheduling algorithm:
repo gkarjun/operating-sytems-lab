@@ -1,0 +1,95 @@
+#include <stdio.h>
+
+#define MAX_PROCESSES 10
+#define TIME_QUANTUM 2 
+
+struct Process {
+    int pid;
+    int burst_time; 
+    int remaining_time;
+    int arrival_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    int executed;
+};
+
+void simulateRoundRobin(struct Process processes[], int n) {
+    int current_time = 0;
+    int remaining_processes = n;
+    int index = 0;
+
+    while (remaining_processes > 0) {
+        if (processes[index].remaining_time > 0) {
+            if (processes[index].remaining_time <= TIME_QUANTUM) {
+                current_time += processes[index].remaining_time;
+                processes[index].remaining_time = 0;
+            } else {
+                current_time += TIME_QUANTUM;
+                processes[index].remaining_time -= TIME_QUANTUM;
+            }
+
+            if (processes[index].remaining_time == 0) {
+                remaining_processes--;
+                processes[index].completion_time = current_time;
+                processes[index].turnaround_time = processes[index].completion_time - processes[index].arrival_time;
+                processes[index].waiting_time = processes[index].turnaround_time - processes[index].burst_time;
+                processes[index].executed = 1;
+            }
+        }
+
+        index = (index + 1) % n;
+
+        int flag = 1;
+        for (int i = 0; i < n; i++) {
+            if (processes[i].executed == 0) {
+                flag = 0;
+                break;
+            }
+        }
+        if (flag) {
+            break; // All processes have been executed
+        }
+    }
+}
+
+void printResult(struct Process processes[], int n) {
+    printf("PID\tBurst Time\tArrival Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].burst_time,
+               processes[i].arrival_time, processes[i].completion_time, processes[i].turnaround_time,
+               processes[i].waiting_time);
+    }
+}
+
+int main() {
+    int n;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    if (n > MAX_PROCESSES || n <= 0) {
+        printf("Invalid number of processes.\n");
+        return 1;
+    }
+
+    struct Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter details for process %d:\n", i + 1);
+        processes[i].pid = i + 1;
+        printf("Burst Time: ");
+        scanf("%d", &processes[i].burst_time);
+        printf("Arrival Time: ");
+        scanf("%d", &processes[i].arrival_time);
+        processes[i].remaining_time = processes[i].burst_time;
+        processes[i].executed = 0;
+    }
+
+    simulateRoundRobin(processes, n);
+
+    printf("\nRound Robin Scheduling Results (Time Quantum: %d):\n", TIME_QUANTUM);
+    printResult(processes, n);
+
+    return 0;
+}
