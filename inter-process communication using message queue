@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <string.h>
+
+#define MAX_MSG_SIZE 256
+
+struct msg_buffer {
+    long msg_type;
+    char msg_text[MAX_MSG_SIZE];
+};
+
+int main() {
+    int msgid;
+    key_t key;
+    struct msg_buffer msg;
+
+    key = ftok(".", 'm');
+    if (key == -1) {
+        perror("ftok");
+        exit(EXIT_FAILURE);
+    }
+
+    msgid = msgget(key, IPC_CREAT | 0666);
+    if (msgid == -1) {
+        perror("msgget");
+        exit(EXIT_FAILURE);
+    }
+
+    msg.msg_type = 1;
+    strncpy(msg.msg_text, "Hello, message queue!", MAX_MSG_SIZE);
+
+    if (msgsnd(msgid, &msg, sizeof(msg.msg_text), 0) == -1) {
+        perror("msgsnd");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Message sent: %s\n", msg.msg_text);
+
+    return 0;
+}
