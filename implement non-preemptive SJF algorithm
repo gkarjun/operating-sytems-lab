@@ -1,0 +1,71 @@
+#include <stdio.h>
+
+struct Process {
+    int pid;
+    int burst_time;
+    int arrival_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    int executed;
+};
+
+void calculateTimesNonPreemptiveSJF(struct Process processes[], int n) {
+    int current_time = 0;
+    int completed_processes = 0;
+    while (completed_processes < n) {
+        int shortest_job_index = -1;
+        int shortest_job_time = __INT_MAX__;
+        for (int i = 0; i < n; i++) {
+            if (!processes[i].executed && processes[i].arrival_time <= current_time && processes[i].burst_time < shortest_job_time) {
+                shortest_job_index = i;
+                shortest_job_time = processes[i].burst_time;
+            }
+        }
+        if (shortest_job_index != -1) {
+            processes[shortest_job_index].completion_time = current_time + processes[shortest_job_index].burst_time;
+            processes[shortest_job_index].turnaround_time = processes[shortest_job_index].completion_time - processes[shortest_job_index].arrival_time;
+            processes[shortest_job_index].waiting_time = processes[shortest_job_index].turnaround_time - processes[shortest_job_index].burst_time;
+            processes[shortest_job_index].executed = 1;
+            current_time = processes[shortest_job_index].completion_time;
+            completed_processes++;
+        } else {
+            current_time++;
+        }
+    }
+}
+
+void printResult(struct Process processes[], int n) {
+    printf("PID\tBurst Time\tArrival Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].burst_time,
+               processes[i].arrival_time, processes[i].completion_time, processes[i].turnaround_time,
+               processes[i].waiting_time);
+    }
+}
+
+int main() {
+    int n;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter details for process %d:\n", i + 1);
+        processes[i].pid = i + 1;
+        printf("Burst Time: ");
+        scanf("%d", &processes[i].burst_time);
+        printf("Arrival Time: ");
+        scanf("%d", &processes[i].arrival_time);
+        processes[i].executed = 0;
+    }
+
+    calculateTimesNonPreemptiveSJF(processes, n);
+
+    printf("\nNon-Preemptive SJF Scheduling Results:\n");
+    printResult(processes, n);
+
+    return 0;
+}
