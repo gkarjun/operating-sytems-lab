@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MEMORY_SIZE 100
+
+typedef struct {
+    int start;
+    int end;
+    int size;
+    int allocated;
+} Partition;
+
+void initializeMemory(Partition memory[], int num_partitions) {
+    for (int i = 0; i < num_partitions; i++) {
+        memory[i].start = -1;
+        memory[i].end = -1;
+        memory[i].size = -1;
+        memory[i].allocated = 0;
+    }
+}
+
+void displayMemory(Partition memory[], int num_partitions) {
+    printf("Memory Status:\n");
+    for (int i = 0; i < num_partitions; i++) {
+        printf("Partition %d: Start = %d, End = %d, Size = %d, Allocated = %s\n", i + 1,
+               memory[i].start, memory[i].end, memory[i].size,
+               memory[i].allocated ? "Yes" : "No");
+    }
+}
+
+void firstFit(Partition memory[], int num_partitions, int process_size) {
+    for (int i = 0; i < num_partitions; i++) {
+        if (!memory[i].allocated && memory[i].size >= process_size) {
+            memory[i].allocated = 1;
+            printf("First Fit: Allocated partition %d for process of size %d\n", i + 1, process_size);
+            return;
+        }
+    }
+    printf("First Fit: Unable to allocate memory for process of size %d\n", process_size);
+}
+
+void bestFit(Partition memory[], int num_partitions, int process_size) {
+    int best_fit_index = -1;
+    int best_fit_size = MEMORY_SIZE + 1;
+    for (int i = 0; i < num_partitions; i++) {
+        if (!memory[i].allocated && memory[i].size >= process_size && memory[i].size < best_fit_size) {
+            best_fit_index = i;
+            best_fit_size = memory[i].size;
+        }
+    }
+    if (best_fit_index != -1) {
+        memory[best_fit_index].allocated = 1;
+        printf("Best Fit: Allocated partition %d for process of size %d\n", best_fit_index + 1, process_size);
+    } else {
+        printf("Best Fit: Unable to allocate memory for process of size %d\n", process_size);
+    }
+}
+
+void worstFit(Partition memory[], int num_partitions, int process_size) {
+    int worst_fit_index = -1;
+    int worst_fit_size = -1;
+    for (int i = 0; i < num_partitions; i++) {
+        if (!memory[i].allocated && memory[i].size >= process_size && memory[i].size > worst_fit_size) {
+            worst_fit_index = i;
+            worst_fit_size = memory[i].size;
+        }
+    }
+    if (worst_fit_index != -1) {
+        memory[worst_fit_index].allocated = 1;
+        printf("Worst Fit: Allocated partition %d for process of size %d\n", worst_fit_index + 1, process_size);
+    } else {
+        printf("Worst Fit: Unable to allocate memory for process of size %d\n", process_size);
+    }
+}
+
+int main() {
+    Partition memory[5];
+
+    initializeMemory(memory, 5);
+
+    displayMemory(memory, 5);
+
+    firstFit(memory, 5, 20);
+    bestFit(memory, 5, 10);
+    worstFit(memory, 5, 30);
+
+    displayMemory(memory, 5);
+
+    return 0;
+}
