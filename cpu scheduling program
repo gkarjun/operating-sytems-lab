@@ -1,0 +1,55 @@
+#include <stdio.h>
+
+struct Process {
+    int pid;
+    int burst_time; 
+    int arrival_time; 
+    int completion_time; 
+    int turnaround_time; 
+    int waiting_time; 
+};
+
+void calculateTimes(struct Process processes[], int n) {
+    int current_time = 0;
+    for (int i = 0; i < n; i++) {
+        if (processes[i].arrival_time > current_time)
+            current_time = processes[i].arrival_time;
+        processes[i].completion_time = current_time + processes[i].burst_time;
+        processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+        current_time = processes[i].completion_time;
+    }
+}
+
+void printResult(struct Process processes[], int n) {
+    printf("PID\tBurst Time\tArrival Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].burst_time,
+               processes[i].arrival_time, processes[i].completion_time, processes[i].turnaround_time,
+               processes[i].waiting_time);
+    }
+}
+
+int main() {
+    int n;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter details for process %d:\n", i + 1);
+        processes[i].pid = i + 1;
+        printf("Burst Time: ");
+        scanf("%d", &processes[i].burst_time);
+        processes[i].arrival_time = 0; // All processes arrive at time 0
+    }
+
+    calculateTimes(processes, n);
+
+    printf("\nFCFS Scheduling Results:\n");
+    printResult(processes, n);
+
+    return 0;
+}
