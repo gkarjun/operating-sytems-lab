@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_EMPLOYEES 100
+#define FILENAME "employees.dat"
+
+typedef struct {
+    int emp_id;
+    char emp_name[50];
+    float emp_salary;
+} Employee;
+
+void addEmployee() {
+    Employee emp;
+    FILE *fp;
+    char choice;
+
+    fp = fopen(FILENAME, "ab");
+
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    do {
+        printf("Enter employee ID: ");
+        scanf("%d", &emp.emp_id);
+        printf("Enter employee name: ");
+        scanf("%s", emp.emp_name);
+        printf("Enter employee salary: ");
+        scanf("%f", &emp.emp_salary);
+
+        fwrite(&emp, sizeof(Employee), 1, fp); // Write employee details to file
+
+        printf("Employee added successfully.\n");
+        printf("Do you want to add another employee? (y/n): ");
+        scanf(" %c", &choice);
+    } while (choice == 'y' || choice == 'Y');
+
+    fclose(fp); // Close file
+}
+
+void displayEmployees() {
+    Employee emp;
+    FILE *fp;
+
+    fp = fopen(FILENAME, "rb"); // Open file in binary read mode
+
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    printf("Employee Details:\n");
+    while (fread(&emp, sizeof(Employee), 1, fp)) { // Read employee details from file
+        printf("Employee ID: %d\n", emp.emp_id);
+        printf("Employee Name: %s\n", emp.emp_name);
+        printf("Employee Salary: %.2f\n", emp.emp_salary);
+        printf("\n");
+    }
+
+    fclose(fp);
+}
+
+void searchEmployee(int emp_id) {
+    Employee emp;
+    FILE *fp;
+    int found = 0;
+
+    fp = fopen(FILENAME, "rb");
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    while (fread(&emp, sizeof(Employee), 1, fp)) { // Read employee details from file
+        if (emp.emp_id == emp_id) {
+            printf("Employee Details:\n");
+            printf("Employee ID: %d\n", emp.emp_id);
+            printf("Employee Name: %s\n", emp.emp_name);
+            printf("Employee Salary: %.2f\n", emp.emp_salary);
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Employee with ID %d not found.\n", emp_id);
+    }
+
+    fclose(fp);
+}
+
+int main() {
+    int choice, emp_id;
+
+    while (1) {
+        printf("\n1. Add Employee\n2. Display Employees\n3. Search Employee by ID\n4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addEmployee();
+                break;
+            case 2:
+                displayEmployees();
+                break;
+            case 3:
+                printf("Enter employee ID to search: ");
+                scanf("%d", &emp_id);
+                searchEmployee(emp_id);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
